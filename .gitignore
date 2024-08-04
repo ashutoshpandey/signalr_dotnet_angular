@@ -111,6 +111,7 @@ Thumbs.db
 
 # Angular CLI
 .angular/cache
+.angular
 
 # Favicon files
 src/favicon.ico

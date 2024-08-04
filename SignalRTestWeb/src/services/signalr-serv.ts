@@ -1,22 +1,31 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SignalRService {
-  private hubConnection: signalR.HubConnection = new signalR.HubConnectionBuilder().withUrl('https://localhost:5001/chathub').build();
+  private signalPushSubject = new Subject<string>();
+  private hubConnection: signalR.HubConnection = new signalR.HubConnectionBuilder().withUrl('http://localhost:5000/signalhub').build();
 
-  public startConnection = () => {
+  signalPush$ = this.signalPushSubject.asObservable();
+
+  constructor() {
+    this.startConnection();
+    this.addSignalListeners();
+  }
+
+  private startConnection() {
     this.hubConnection
       .start()
       .then(() => console.log('Connection started'))
       .catch(err => console.log('Error while starting connection: ' + err));
   }
 
-  public addDataListener = () => {
-    this.hubConnection.on('ReceiveMessage', (user: string, message: string) => {
-      console.log(`User: ${user}, Message: ${message}`);
+  private addSignalListeners() {
+    this.hubConnection.on('SignalPush', (data: string) => {
+      this.signalPushSubject.next(data);
     });
   }
 
